@@ -16,23 +16,54 @@ export default function LoginPage() {
 function LoginContent() {
   const params = useSearchParams()
   const next = params.get('next') ?? '/matches'
-  const [loadingProvider, setLoadingProvider] = useState<'google' | 'kakao' | null>(null)
-  const [error, setError] = useState<string | null>(null)
+  const errorParam = params.get('error')
+  const errorDetail = params.get('detail')
+  const [loadingProvider, setLoadingProvider] = useState<'google' | 'kakao' | null>(
+    null
+  )
+  const [error, setError] = useState<string | null>(
+    errorParam ? `${errorParam}${errorDetail ? `: ${errorDetail}` : ''}` : null
+  )
 
-  async function signIn(provider: 'google' | 'kakao') {
-    setLoadingProvider(provider)
+  // 카카오: Supabase signInWithOAuth 우회. 직접 카카오 OAuth URL로 리다이렉트.
+  //   - 일반 앱은 account_email 권한 없음 → signInWithOAuth가 자동 추가하면 KOE205
+  //   - 우리 callback (/auth/kakao/callback)에서 토큰 교환 + signInWithIdToken
+  function signInWithKakao() {
+    setLoadingProvider('kakao')
+    setError(null)
+    const clientId = process.env.NEXT_PUBLIC_KAKAO_CLIENT_ID
+    if (!clientId) {
+      setError('카카오 설정이 누락되었습니다 (NEXT_PUBLIC_KAKAO_CLIENT_ID)')
+      setLoadingProvider(null)
+      return
+    }
+    const redirectUri = `${window.location.origin}/auth/kakao/callback`
+    const scope = 'openid profile_nickname profile_image'
+    const state = next
+    const url =
+      `https://kauth.kakao.com/oauth/authorize?response_type=code` +
+      `&client_id=${encodeURIComponent(clientId)}` +
+      `&redirect_uri=${encodeURIComponent(redirectUri)}` +
+      `&scope=${encodeURIComponent(scope)}` +
+      `&state=${encodeURIComponent(state)}`
+    window.location.href = url
+  }
+
+  // 구글: 표준 Supabase OAuth (이메일 권한 문제 없음)
+  async function signInWithGoogle() {
+    setLoadingProvider('google')
     setError(null)
     try {
       const supabase = createClient()
       const { error } = await supabase.auth.signInWithOAuth({
-        provider,
+        provider: 'google',
         options: {
           redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`,
         },
       })
       if (error) throw error
     } catch (e) {
-      setError(e instanceof Error ? e.message : '로그인에 실패했습니다')
+      setError(e instanceof Error ? e.message : '구글 로그인에 실패했습니다')
       setLoadingProvider(null)
     }
   }
@@ -56,28 +87,27 @@ function LoginContent() {
           <div className="mt-8 space-y-3">
             <button
               type="button"
-              onClick={() => signIn('google')}
+              onClick={signInWithKakao}
+              disabled={loadingProvider !== null}
+              className="w-full h-14 flex items-center justify-center gap-3 rounded-2xl bg-[#FEE500] text-[#3C1E1E] font-bold text-base hover:brightness-95 transition disabled:opacity-50"
+            >
+              <KakaoIcon />
+              {loadingProvider === 'kakao' ? '카카오 연결 중...' : '카카오로 시작하기'}
+            </button>
+
+            <button
+              type="button"
+              onClick={signInWithGoogle}
               disabled={loadingProvider !== null}
               className="w-full h-14 flex items-center justify-center gap-3 rounded-2xl bg-white border-2 border-[var(--border)] text-[var(--brand-dark)] font-bold text-base hover:border-[var(--brand-dark)] transition disabled:opacity-50"
             >
               <GoogleIcon />
               {loadingProvider === 'google' ? '연결 중...' : 'Google로 시작하기'}
             </button>
-
-            <button
-              type="button"
-              onClick={() => signIn('kakao')}
-              disabled
-              title="카카오 비즈 앱 전환 후 활성화 예정"
-              className="w-full h-14 flex items-center justify-center gap-3 rounded-2xl bg-[#FEE500]/40 text-[#3C1E1E]/40 font-bold text-base cursor-not-allowed"
-            >
-              <KakaoIcon />
-              카카오 로그인 (준비 중)
-            </button>
           </div>
 
           {error && (
-            <p className="mt-4 text-sm text-red-600 bg-red-50 rounded-lg p-3 text-center">
+            <p className="mt-4 text-sm text-red-600 bg-red-50 rounded-lg p-3 text-center break-all">
               {error}
             </p>
           )}
