@@ -1,0 +1,77 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #2d1b0f;
+
+  /* 🥭 망고 브랜드 컬러 — 진짜 잘 익은 망고 톤 */
+  --brand-primary: #ff8c42;        /* 망고 오렌지 — CTA/포인트 (잘 익은 살) */
+  --brand-primary-hover: #e5733a;  /* 망고 오렌지 진하게 */
+  --brand-yellow: #ffc857;         /* 망고 노랑 — 강조/햇살 */
+  --brand-bg-warm: #fff4e0;        /* 망고 속살 — 부드러운 베이지 배경 */
+  --brand-accent: #6b9b5c;         /* 망고 잎 그린 — 보조 (실력/매칭 표시) */
+  --brand-dark: #3d2817;           /* 망고 씨앗 — 텍스트 강조 (따뜻한 다크) */
+
+  --muted: #faf5ed;                /* 망고 베이지 라이트 */
+  --muted-foreground: #8b6f4e;     /* 망고 베이지 다크 (가독성 OK) */
+  --border: #f0e3cf;               /* 망고 베이지 보더 */
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-brand: var(--brand-primary);
+  --color-brand-hover: var(--brand-primary-hover);
+  --color-brand-yellow: var(--brand-yellow);
+  --color-brand-bg: var(--brand-bg-warm);
+  --color-brand-accent: var(--brand-accent);
+  --color-brand-dark: var(--brand-dark);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --font-sans: var(--font-noto-sans-kr), system-ui, sans-serif;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 모바일 우선 — 입력 시 줌 방지 */
+input,
+select,
+textarea {
+  font-size: 16px;
+}
+
+/* 공용 입력 스타일 */
+.input {
+  width: 100%;
+  height: 44px;
+  padding: 0 14px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: white;
+  font-size: 15px;
+  color: var(--brand-dark);
+  outline: none;
+  transition: border-color 0.15s;
+}
+.input:focus {
+  border-color: var(--brand-primary);
+}
+textarea.input {
+  height: auto;
+  padding: 12px 14px;
+  line-height: 1.5;
+}
+
+/* 🥭 망고 그라데이션 — 노랑 → 오렌지 (잘 익는 모습) */
+.mango-gradient {
+  background: linear-gradient(135deg, var(--brand-yellow) 0%, var(--brand-primary) 100%);
+}
+.mango-gradient-soft {
+  background: linear-gradient(135deg, #fff4e0 0%, #ffe4c2 100%);
+}
