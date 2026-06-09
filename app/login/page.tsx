@@ -27,6 +27,9 @@ function LoginContent() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: 'kakao',
         options: {
+          // 일반 앱은 account_email 권한 없음 → 명시적으로 nickname/image만 요청
+          // 비즈 앱 전환 후 이 옵션 제거하면 이메일까지 받을 수 있음
+          scopes: 'profile_nickname profile_image',
           redirectTo: `${window.location.origin}/auth/callback?next=${encodeURIComponent(next)}`,
         },
       })
