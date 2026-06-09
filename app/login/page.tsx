@@ -1,11 +1,19 @@
 'use client'
 
-import { useState } from 'react'
+import { Suspense, useState } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
 export default function LoginPage() {
+  return (
+    <Suspense fallback={<LoginSkeleton />}>
+      <LoginContent />
+    </Suspense>
+  )
+}
+
+function LoginContent() {
   const params = useSearchParams()
   const next = params.get('next') ?? '/matches'
   const [loading, setLoading] = useState(false)
@@ -75,6 +83,23 @@ export default function LoginPage() {
         >
           ← 홈으로
         </Link>
+      </div>
+    </div>
+  )
+}
+
+function LoginSkeleton() {
+  return (
+    <div className="flex flex-1 items-center justify-center px-5 py-12">
+      <div className="w-full max-w-sm">
+        <div className="flex items-center justify-center gap-2 mb-8">
+          <span className="text-3xl">🥭</span>
+          <span className="font-black text-2xl text-[var(--brand-dark)]">망고</span>
+        </div>
+        <div className="bg-white rounded-3xl border border-[var(--border)] p-8 shadow-sm">
+          <div className="h-6 w-40 mx-auto bg-[var(--muted)] rounded animate-pulse" />
+          <div className="h-14 mt-8 bg-[var(--muted)] rounded-2xl animate-pulse" />
+        </div>
       </div>
     </div>
   )
