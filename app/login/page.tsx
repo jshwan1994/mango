@@ -37,7 +37,9 @@ function LoginContent() {
       setLoadingProvider(null)
       return
     }
-    const redirectUri = `${window.location.origin}/auth/kakao/callback`
+    // redirect_uri는 카카오에 등록된 도메인과 정확히 일치해야 함 (Vercel preview URL 회피)
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || window.location.origin
+    const redirectUri = `${siteUrl}/auth/kakao/callback`
     const scope = 'openid profile_nickname profile_image'
     const state = next
     const url =

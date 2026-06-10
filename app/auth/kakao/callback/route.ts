@@ -35,6 +35,11 @@ export async function GET(request: Request) {
     return NextResponse.redirect(`${origin}/login?error=kakao_config_missing`)
   }
 
+  // redirect_uri는 인가 코드 요청 때와 정확히 동일해야 함 (카카오 검증)
+  // Vercel preview URL 대신 NEXT_PUBLIC_SITE_URL 사용
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || origin
+  const redirectUri = `${siteUrl}/auth/kakao/callback`
+
   try {
     // 1) 카카오 토큰 교환 (code → id_token + access_token)
     const tokenRes = await fetch('https://kauth.kakao.com/oauth/token', {
@@ -44,7 +49,7 @@ export async function GET(request: Request) {
         grant_type: 'authorization_code',
         client_id: clientId,
         client_secret: clientSecret,
-        redirect_uri: `${origin}/auth/kakao/callback`,
+        redirect_uri: redirectUri,
         code,
       }),
     })
