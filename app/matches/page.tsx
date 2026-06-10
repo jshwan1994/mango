@@ -1,19 +1,27 @@
 import Link from 'next/link'
-import { MapPin, Clock, Users, Plus } from 'lucide-react'
+import Image from 'next/image'
+import { MapPin, Users, Plus } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { SiteHeader } from '@/components/site-header'
+import { MatchModeTabs } from '@/components/match-mode-tabs'
+import { MatchFilters } from '@/components/match-filters'
 import { formatGrade, formatMatchType } from '@/lib/utils'
-import type { Match, Court } from '@/types/database'
+import type { Match, Court, MatchMode } from '@/types/database'
 
-type MatchWithCourt = Match & { courts: Pick<Court, 'name' | 'region_sigungu'> | null }
+type MatchWithCourt = Match & {
+  courts: Pick<Court, 'name' | 'region_sigungu' | 'image_url'> | null
+}
 
-async function fetchOpenMatches(): Promise<MatchWithCourt[]> {
+const VALID_MODES: MatchMode[] = ['social', 'skill', 'court']
+
+async function fetchOpenMatches(mode: MatchMode): Promise<MatchWithCourt[]> {
   try {
     const supabase = await createClient()
     const { data, error } = await supabase
       .from('matches')
-      .select('*, courts(name, region_sigungu)')
+      .select('*, courts(name, region_sigungu, image_url)')
       .eq('status', 'open')
+      .eq('match_mode', mode)
       .gte('scheduled_at', new Date().toISOString())
       .order('scheduled_at', { ascending: true })
       .limit(50)
@@ -29,61 +37,78 @@ async function fetchOpenMatches(): Promise<MatchWithCourt[]> {
   }
 }
 
-export default async function MatchesPage() {
-  const matches = await fetchOpenMatches()
+export default async function MatchesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ mode?: string }>
+}) {
+  const params = await searchParams
+  const mode: MatchMode = VALID_MODES.includes(params.mode as MatchMode)
+    ? (params.mode as MatchMode)
+    : 'social'
+  const matches = await fetchOpenMatches(mode)
 
   return (
-    <div className="flex flex-col flex-1">
+    <div className="flex flex-col flex-1 pb-20">
       <SiteHeader />
 
-      <div className="max-w-5xl w-full mx-auto px-5 pt-6 flex items-center justify-between">
-        <h1 className="text-xl font-black text-[var(--brand-dark)]">모집 중인 매치</h1>
-        <Link
-          href="/matches/new"
-          className="flex items-center gap-1 px-3 py-2 text-sm font-bold rounded-full bg-[var(--brand-primary)] text-white hover:bg-[var(--brand-primary-hover)] transition"
-        >
-          <Plus className="w-4 h-4" /> 매치 모집
-        </Link>
-      </div>
+      <MatchModeTabs current={mode} />
+      <MatchFilters />
 
-      <main className="max-w-5xl w-full mx-auto px-5 py-6 flex-1">
+      <main className="max-w-5xl w-full mx-auto px-5 py-5 flex-1">
         {matches.length === 0 ? (
-          <EmptyState />
+          <EmptyState mode={mode} />
         ) : (
-          <ul className="grid sm:grid-cols-2 gap-4">
+          <ul className="space-y-3">
             {matches.map((m) => (
               <MatchCard key={m.id} match={m} />
             ))}
           </ul>
         )}
       </main>
+
+      {/* 플로팅 + 버튼 (스매시 패턴) */}
+      <Link
+        href="/matches/new"
+        aria-label="매치 모집하기"
+        className="fixed bottom-24 right-5 z-30 flex items-center justify-center w-14 h-14 rounded-full mango-gradient text-white shadow-xl shadow-[var(--brand-primary)]/40 hover:brightness-95 active:scale-95 transition"
+      >
+        <Plus className="w-7 h-7" strokeWidth={2.5} />
+      </Link>
     </div>
   )
 }
 
-function EmptyState() {
+function EmptyState({ mode }: { mode: MatchMode }) {
+  const labels: Record<MatchMode, { title: string; desc: string }> = {
+    social: {
+      title: '아직 친목 매칭이 없어요',
+      desc: '가장 먼저 게임데이를 모집해 동료를 만나보세요',
+    },
+    skill: {
+      title: '아직 급수 매칭이 없어요',
+      desc: '같은 급수끼리 진검승부할 매치를 모집해보세요',
+    },
+    court: {
+      title: '체육관 예약은 준비 중이에요',
+      desc: '곧 체육관 직접 예약 기능이 열립니다',
+    },
+  }
+  const { title, desc } = labels[mode]
+
   return (
     <div className="text-center py-16 px-5">
       <div className="text-6xl mb-4">🥭</div>
-      <h2 className="text-xl font-black text-[var(--brand-dark)]">
-        아직 모집 중인 매치가 없어요
-      </h2>
-      <p className="mt-2 text-[var(--muted-foreground)]">
-        가장 먼저 매치를 모집하고 동료를 만나보세요
-      </p>
-      <Link
-        href="/matches/new"
-        className="inline-flex mt-6 px-6 py-3 text-sm font-bold rounded-full bg-[var(--brand-primary)] text-white hover:bg-[var(--brand-primary-hover)] transition"
-      >
-        <Plus className="w-4 h-4 mr-1" /> 첫 매치 모집하기
-      </Link>
-
-      <div className="mt-12 p-5 bg-white rounded-2xl border border-[var(--border)] text-left max-w-md mx-auto">
-        <p className="text-xs font-bold text-[var(--brand-primary)]">🚧 베타 안내</p>
-        <p className="mt-2 text-sm text-[var(--muted-foreground)] leading-relaxed">
-          현재 송도 · 인천 지역에서 베타 테스트 중입니다. Supabase 연결 전이면 빈 화면이 정상입니다. <code className="px-1.5 py-0.5 bg-[var(--muted)] rounded text-xs">.env.local</code> 설정 후 데이터가 표시됩니다.
-        </p>
-      </div>
+      <h2 className="text-xl font-black text-[var(--brand-dark)]">{title}</h2>
+      <p className="mt-2 text-[var(--muted-foreground)]">{desc}</p>
+      {mode !== 'court' && (
+        <Link
+          href="/matches/new"
+          className="inline-flex mt-6 px-6 py-3 text-sm font-bold rounded-full mango-gradient text-white hover:brightness-95 transition"
+        >
+          <Plus className="w-4 h-4 mr-1" /> 첫 매치 모집하기
+        </Link>
+      )}
     </div>
   )
 }
@@ -91,59 +116,91 @@ function EmptyState() {
 function MatchCard({ match }: { match: MatchWithCourt }) {
   const scheduled = new Date(match.scheduled_at)
   const dateStr = scheduled.toLocaleDateString('ko-KR', {
-    month: 'short',
+    month: 'numeric',
     day: 'numeric',
     weekday: 'short',
   })
-  const timeStr = scheduled.toLocaleTimeString('ko-KR', {
+  const startTime = scheduled.toLocaleTimeString('ko-KR', {
     hour: '2-digit',
     minute: '2-digit',
     hour12: false,
   })
-  const location =
-    match.courts?.name ??
-    match.custom_location ??
-    '장소 미정'
+  const end = new Date(scheduled.getTime() + match.duration_minutes * 60_000)
+  const endTime = end.toLocaleTimeString('ko-KR', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  })
+  const location = match.courts?.name ?? match.custom_location ?? '장소 미정'
   const region = match.courts?.region_sigungu
+  const imageUrl =
+    match.courts?.image_url ??
+    'https://placehold.co/600x400/FFF4E0/3D2817?text=Mango+Court'
+  const isFull = match.current_participants >= match.max_participants
 
   return (
     <Link
       href={`/matches/${match.id}`}
-      className="block p-5 bg-white rounded-2xl border border-[var(--border)] hover:border-[var(--brand-primary)] hover:shadow-md transition-all"
+      className="flex bg-white rounded-2xl border border-[var(--border)] overflow-hidden hover:border-[var(--brand-primary)] hover:shadow-md transition-all"
     >
-      <div className="flex items-start justify-between gap-3">
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 text-xs">
-            <span className="px-2 py-0.5 rounded-full bg-[var(--brand-bg-warm)] text-[var(--brand-primary)] font-bold">
-              {formatMatchType(match.match_type)}
-            </span>
-            <span className="px-2 py-0.5 rounded-full bg-[var(--brand-accent)]/10 text-[var(--brand-accent)] font-bold">
-              {formatGrade(match.grade_min)}~{formatGrade(match.grade_max)}
-            </span>
-          </div>
-          <h3 className="mt-2 font-bold text-[var(--brand-dark)] truncate">
-            {match.title}
-          </h3>
-        </div>
-        <div className="flex-shrink-0 text-right">
-          <p className="text-xs text-[var(--muted-foreground)]">{dateStr}</p>
-          <p className="text-lg font-black text-[var(--brand-dark)]">{timeStr}</p>
-        </div>
+      {/* 좌측 체육관 사진 — 스매시 패턴 */}
+      <div className="relative w-28 sm:w-36 flex-shrink-0 bg-[var(--muted)]">
+        <Image
+          src={imageUrl}
+          alt={location}
+          fill
+          sizes="(max-width: 640px) 112px, 144px"
+          className="object-cover"
+        />
       </div>
 
-      <div className="mt-4 flex items-center gap-4 text-xs text-[var(--muted-foreground)]">
-        <span className="flex items-center gap-1">
-          <MapPin className="w-3.5 h-3.5" />
-          {location}{region ? ` · ${region}` : ''}
-        </span>
-        <span className="flex items-center gap-1">
-          <Clock className="w-3.5 h-3.5" />
-          {match.duration_minutes}분
-        </span>
-        <span className="flex items-center gap-1 ml-auto font-bold text-[var(--brand-dark)]">
-          <Users className="w-3.5 h-3.5" />
-          {match.current_participants}/{match.max_participants}
-        </span>
+      {/* 우측 정보 */}
+      <div className="flex-1 min-w-0 p-4">
+        <div className="flex items-start justify-between gap-2">
+          <div className="flex items-center gap-1.5 flex-wrap">
+            {region && (
+              <span className="inline-flex items-center text-xs text-[var(--muted-foreground)]">
+                <MapPin className="w-3 h-3 mr-0.5" />
+                {region}
+              </span>
+            )}
+          </div>
+          <span
+            className={`flex-shrink-0 inline-flex items-center gap-1 text-xs font-bold ${
+              isFull
+                ? 'text-[var(--muted-foreground)]'
+                : 'text-[var(--brand-primary)]'
+            }`}
+          >
+            <Users className="w-3.5 h-3.5" />
+            {match.current_participants}/{match.max_participants}명
+          </span>
+        </div>
+
+        <h3 className="mt-1 font-bold text-[var(--brand-dark)] truncate">
+          {location}
+        </h3>
+
+        <p className="mt-1 text-sm text-[var(--brand-dark)]">
+          <span className="font-medium">{dateStr}</span>{' '}
+          <span className="text-[var(--brand-primary)] font-bold">
+            {startTime}~{endTime}
+          </span>
+        </p>
+
+        <div className="mt-2 flex items-center gap-1.5 text-xs flex-wrap">
+          <span className="px-2 py-0.5 rounded-full bg-[var(--brand-bg-warm)] text-[var(--brand-primary)] font-bold">
+            {formatMatchType(match.match_type)}
+          </span>
+          <span className="px-2 py-0.5 rounded-full bg-[var(--brand-accent)]/15 text-[var(--brand-accent)] font-bold">
+            {formatGrade(match.grade_min)}~{formatGrade(match.grade_max)}
+          </span>
+          {match.cost_per_person > 0 && (
+            <span className="text-[var(--muted-foreground)]">
+              {match.cost_per_person.toLocaleString()}원
+            </span>
+          )}
+        </div>
       </div>
     </Link>
   )

@@ -8,6 +8,7 @@
 
 export type SkillGrade = 'beginner' | 'd' | 'c' | 'b' | 'a' | 'jagang'
 export type MatchType = 'singles' | 'doubles' | 'mixed' | 'game_day'
+export type MatchMode = 'social' | 'skill' | 'court'
 export type MatchStatus =
   | 'open'
   | 'full'
@@ -34,6 +35,9 @@ export type Profile = {
   matches_played: number
   matches_won: number
   is_phone_verified: boolean
+  manner_score: number
+  satisfaction_rate: number | null
+  review_count: number
   created_at: string
   updated_at: string
 }
@@ -53,6 +57,7 @@ export type Court = {
   parking_available: boolean | null
   shower_available: boolean | null
   notes: string | null
+  image_url: string | null
   created_at: string
 }
 
@@ -63,6 +68,7 @@ export type Match = {
   title: string
   description: string | null
   match_type: MatchType
+  match_mode: MatchMode
   scheduled_at: string
   duration_minutes: number
   custom_location: string | null
@@ -99,7 +105,7 @@ type ProfileInsert = Partial<Profile> & Pick<Profile, 'id' | 'nickname'>
 type CourtInsert = AutoInsert<Court, 'id' | 'created_at'>
 type MatchInsert = AutoInsert<
   Match,
-  'id' | 'created_at' | 'updated_at' | 'current_participants' | 'status'
+  'id' | 'created_at' | 'updated_at' | 'current_participants' | 'status' | 'match_mode'
 >
 type ParticipantInsert = AutoInsert<
   MatchParticipant,

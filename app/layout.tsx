@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { Noto_Sans_KR } from 'next/font/google'
+import { MobileTabBar } from '@/components/mobile-tab-bar'
 import './globals.css'
 
 const notoSansKR = Noto_Sans_KR({
@@ -49,6 +50,7 @@ export default function RootLayout({
     <html lang="ko" className={`${notoSansKR.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col bg-[var(--brand-bg-warm)]">
         {children}
+        <MobileTabBar />
       </body>
     </html>
   )

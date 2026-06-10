@@ -75,3 +75,17 @@ textarea.input {
 .mango-gradient-soft {
   background: linear-gradient(135deg, #fff4e0 0%, #ffe4c2 100%);
 }
+
+/* 가로 스크롤 필터 (스크롤바 숨김) */
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* iOS 노치 영역 보호 (하단 탭바) */
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
