@@ -2,6 +2,7 @@
 
 import { Suspense, useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useSearchParams } from 'next/navigation'
 import { createClient } from '@/lib/supabase/client'
 
@@ -73,9 +74,15 @@ function LoginContent() {
   return (
     <div className="flex flex-1 items-center justify-center px-5 py-12">
       <div className="w-full max-w-sm">
-        <Link href="/" className="flex items-center justify-center gap-2 mb-8">
-          <span className="text-3xl">🥭</span>
-          <span className="font-black text-2xl text-[var(--brand-dark)]">망고</span>
+        <Link href="/" className="flex flex-col items-center gap-2 mb-8">
+          <Image
+            src="/mango-logo.png"
+            alt="망고 Mango"
+            width={120}
+            height={120}
+            priority
+            className="rounded-2xl shadow-sm"
+          />
         </Link>
 
         <div className="bg-white rounded-3xl border border-[var(--border)] p-8 shadow-sm">
@@ -137,9 +144,15 @@ function LoginSkeleton() {
   return (
     <div className="flex flex-1 items-center justify-center px-5 py-12">
       <div className="w-full max-w-sm">
-        <div className="flex items-center justify-center gap-2 mb-8">
-          <span className="text-3xl">🥭</span>
-          <span className="font-black text-2xl text-[var(--brand-dark)]">망고</span>
+        <div className="flex flex-col items-center gap-2 mb-8">
+          <Image
+            src="/mango-logo.png"
+            alt="망고 Mango"
+            width={120}
+            height={120}
+            priority
+            className="rounded-2xl shadow-sm"
+          />
         </div>
         <div className="bg-white rounded-3xl border border-[var(--border)] p-8 shadow-sm">
           <div className="h-6 w-40 mx-auto bg-[var(--muted)] rounded animate-pulse" />

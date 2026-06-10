@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { MapPin, Zap, Users, Sparkles } from 'lucide-react'
 import { SiteHeader } from '@/components/site-header'
 
@@ -123,7 +124,13 @@ export default function HomePage() {
       <footer className="px-5 py-8 bg-white border-t border-[var(--border)]">
         <div className="max-w-5xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-3 text-sm text-[var(--muted-foreground)]">
           <div className="flex items-center gap-2">
-            <span>🥭</span>
+            <Image
+              src="/mango-logo.png"
+              alt="망고"
+              width={24}
+              height={24}
+              className="rounded"
+            />
             <span className="font-bold text-[var(--brand-dark)]">망고 Mango</span>
             <span>· 2026</span>
           </div>

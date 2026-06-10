@@ -9,7 +9,11 @@ const notoSansKR = Noto_Sans_KR({
   display: 'swap',
 })
 
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL ?? 'https://mango-snowy.vercel.app'
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: '망고 Mango — 망설이지 말고, 운동 매칭',
   description:
     '오늘 저녁 빈자리 1명! 위치·시간·실력으로 30초 안에 매칭되는 종합 운동 플랫폼. 배드민턴·테니스·풋살·러닝·헬스 등 모든 운동.',
@@ -19,6 +23,20 @@ export const metadata: Metadata = {
     description: '30초 즉석 운동 매칭',
     locale: 'ko_KR',
     type: 'website',
+    images: [
+      {
+        url: '/opengraph-image.png',
+        width: 256,
+        height: 256,
+        alt: '망고 Mango 로고',
+      },
+    ],
+  },
+  twitter: {
+    card: 'summary',
+    title: '망고 Mango — 망설이지 말고',
+    description: '30초 즉석 운동 매칭',
+    images: ['/opengraph-image.png'],
   },
 }
 

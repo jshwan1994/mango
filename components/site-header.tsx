@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { createClient } from '@/lib/supabase/server'
 import { signOut } from '@/app/actions/auth'
 
@@ -27,8 +28,15 @@ export async function SiteHeader({ variant = 'app' }: { variant?: Variant }) {
   return (
     <header className="sticky top-0 z-20 bg-white/90 backdrop-blur border-b border-[var(--border)]">
       <div className="max-w-5xl mx-auto px-5 py-3.5 flex items-center justify-between gap-3">
-        <Link href="/" className="flex items-center gap-1.5">
-          <span className="text-xl">🥭</span>
+        <Link href="/" className="flex items-center gap-2">
+          <Image
+            src="/mango-logo.png"
+            alt="망고 Mango 로고"
+            width={36}
+            height={36}
+            priority
+            className="rounded-lg"
+          />
           <span className="font-black text-lg text-[var(--brand-dark)]">망고</span>
         </Link>
 
