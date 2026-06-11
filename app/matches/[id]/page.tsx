@@ -283,6 +283,27 @@ export default async function MatchDetailPage({
           </section>
         )}
 
+        {/* 스코어 보드 진입 (참가자만 — 클라이언트에서 자동 가드) */}
+        {(myStatus === 'host' || myStatus === 'approved' || myStatus === 'attended') && (
+          <Link
+            href={`/matches/${match.id}/score`}
+            className="block p-4 bg-white rounded-2xl border border-[var(--border)] hover:border-[var(--brand-primary)] transition"
+          >
+            <div className="flex items-center gap-3">
+              <span className="w-10 h-10 rounded-xl mango-gradient text-white flex items-center justify-center text-xl">
+                🏸
+              </span>
+              <div className="flex-1 min-w-0">
+                <p className="font-bold text-[var(--brand-dark)]">임시 스코어 보드</p>
+                <p className="text-xs text-[var(--muted-foreground)]">
+                  게임 중 점수를 빠르게 기록하세요
+                </p>
+              </div>
+              <span className="text-[var(--brand-primary)] font-bold text-sm">기록 →</span>
+            </div>
+          </Link>
+        )}
+
         {/* 참가자 아바타 그리드 (스매시 패턴) */}
         <section className="bg-white rounded-2xl border border-[var(--border)] p-5">
           <h2 className="text-base font-black text-[var(--brand-dark)]">

@@ -86,8 +86,13 @@ export default async function ProfilePage() {
               </span>
             )}
             <div className="flex-1 min-w-0">
-              <p className="text-lg font-black text-[var(--brand-dark)]">
+              <p className="text-lg font-black text-[var(--brand-dark)] flex items-center gap-1.5">
                 {profile.nickname}
+                {profile.association_code && (
+                  <span className="text-xs px-1.5 py-0.5 rounded bg-[var(--brand-primary)]/10 text-[var(--brand-primary)] font-bold">
+                    #{profile.association_code}
+                  </span>
+                )}
               </p>
               <p className="text-sm text-[var(--muted-foreground)]">
                 {formatGrade(profile.self_grade)} · 매너 {profile.manner_score}
@@ -121,18 +126,17 @@ export default async function ProfilePage() {
           <span className="text-xs text-[var(--muted-foreground)]">준비 중</span>
         </section>
 
-        {/* 호스팅 그룹 */}
-        <MenuGroup title="호스팅">
+        {/* 모임 그룹 */}
+        <MenuGroup title="모임 · 대회">
           <MenuItem
-            href="/profile/guests"
+            href="/clubs?my=1"
             icon={<Users className="w-5 h-5" />}
-            label="게스트 요청"
-            comingSoon
+            label="가입한 동호회"
           />
           <MenuItem
-            href="/profile/settlements"
-            icon={<Wallet className="w-5 h-5" />}
-            label="정산"
+            href="/tournaments?my=1"
+            icon={<Trophy className="w-5 h-5" />}
+            label="나의 대회 기록"
             comingSoon
           />
           <MenuItem
@@ -142,14 +146,24 @@ export default async function ProfilePage() {
           />
         </MenuGroup>
 
-        {/* 활동 그룹 */}
-        <MenuGroup title="활동">
+        {/* 망고샵 그룹 */}
+        <MenuGroup title="망고샵">
           <MenuItem
             href="/profile/payments"
             icon={<Receipt className="w-5 h-5" />}
-            label="결제 내역"
+            label="주문 내역"
             comingSoon
           />
+          <MenuItem
+            href="/profile/wishlist"
+            icon={<Star className="w-5 h-5" />}
+            label="찜한 상품"
+            comingSoon
+          />
+        </MenuGroup>
+
+        {/* 활동 그룹 */}
+        <MenuGroup title="활동">
           <MenuItem
             href="/profile/reviews"
             icon={<Star className="w-5 h-5" />}
@@ -166,6 +180,12 @@ export default async function ProfilePage() {
             href="/profile/favorites"
             icon={<Star className="w-5 h-5" />}
             label="즐겨찾는 체육관"
+            comingSoon
+          />
+          <MenuItem
+            href="/profile/settlements"
+            icon={<Wallet className="w-5 h-5" />}
+            label="정산"
             comingSoon
           />
         </MenuGroup>

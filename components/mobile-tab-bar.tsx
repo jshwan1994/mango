@@ -2,27 +2,34 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Home, Bell, MessageSquare, MessageCircle, User } from 'lucide-react'
+import { Zap, Users, Trophy, ShoppingBag, User } from 'lucide-react'
 
+// 배프 + 스매시 융합 5탭
 const TABS = [
-  { href: '/matches', label: '홈', Icon: Home },
-  { href: '/alerts', label: '알림', Icon: Bell },
-  { href: '/board', label: '담벼락', Icon: MessageSquare },
-  { href: '/chat', label: '채팅', Icon: MessageCircle },
+  { href: '/matches', label: '매칭', Icon: Zap },
+  { href: '/clubs', label: '모임', Icon: Users },
+  { href: '/tournaments', label: '대회', Icon: Trophy },
+  { href: '/shop', label: '망고샵', Icon: ShoppingBag },
   { href: '/profile', label: '내 정보', Icon: User },
 ]
 
-// 탭바를 숨길 경로들 (로그인/셋업/랜딩)
 const HIDDEN_PATHS = ['/', '/login', '/profile/setup', '/auth']
 
 export function MobileTabBar() {
   const pathname = usePathname()
 
-  // 숨김 경로 또는 매치 모집/상세는 풀스크린 모드 → 탭바 숨김
   if (HIDDEN_PATHS.some((p) => pathname === p || pathname.startsWith(p))) {
     return null
   }
-  if (pathname.startsWith('/matches/new') || pathname.match(/^\/matches\/[^/]+$/)) {
+  // 모집/생성/상세 페이지는 풀스크린
+  if (
+    pathname.startsWith('/matches/new') ||
+    pathname.startsWith('/clubs/new') ||
+    pathname.startsWith('/tournaments/new') ||
+    pathname.match(/^\/matches\/[^/]+/) ||
+    pathname.match(/^\/clubs\/[^/]+/) ||
+    pathname.match(/^\/tournaments\/[^/]+/)
+  ) {
     return null
   }
 
@@ -34,9 +41,7 @@ export function MobileTabBar() {
       <ul className="flex max-w-5xl mx-auto">
         {TABS.map(({ href, label, Icon }) => {
           const active =
-            href === '/matches'
-              ? pathname === '/matches' || pathname.startsWith('/matches?')
-              : pathname.startsWith(href)
+            pathname === href || pathname.startsWith(`${href}?`) || pathname.startsWith(`${href}/`)
           return (
             <li key={href} className="flex-1">
               <Link

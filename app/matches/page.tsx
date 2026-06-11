@@ -3,16 +3,32 @@ import Image from 'next/image'
 import { MapPin, Users, Plus } from 'lucide-react'
 import { createClient } from '@/lib/supabase/server'
 import { SiteHeader } from '@/components/site-header'
+import { BannerCarousel } from '@/components/banner-carousel'
 import { MatchModeTabs } from '@/components/match-mode-tabs'
 import { MatchFilters } from '@/components/match-filters'
 import { formatGrade, formatMatchType } from '@/lib/utils'
-import type { Match, Court, MatchMode } from '@/types/database'
+import type { Match, Court, MatchMode, Banner } from '@/types/database'
 
 type MatchWithCourt = Match & {
   courts: Pick<Court, 'name' | 'region_sigungu' | 'image_url'> | null
 }
 
 const VALID_MODES: MatchMode[] = ['social', 'skill', 'court']
+
+async function fetchActiveBanners(): Promise<Banner[]> {
+  try {
+    const supabase = await createClient()
+    const { data } = await supabase
+      .from('banners')
+      .select('*')
+      .eq('is_active', true)
+      .order('sort_order', { ascending: true })
+      .limit(5)
+    return (data ?? []) as Banner[]
+  } catch {
+    return []
+  }
+}
 
 async function fetchOpenMatches(mode: MatchMode): Promise<MatchWithCourt[]> {
   try {
@@ -46,11 +62,16 @@ export default async function MatchesPage({
   const mode: MatchMode = VALID_MODES.includes(params.mode as MatchMode)
     ? (params.mode as MatchMode)
     : 'social'
-  const matches = await fetchOpenMatches(mode)
+  const [matches, banners] = await Promise.all([
+    fetchOpenMatches(mode),
+    fetchActiveBanners(),
+  ])
 
   return (
     <div className="flex flex-col flex-1 pb-20">
       <SiteHeader />
+
+      <BannerCarousel banners={banners} />
 
       <MatchModeTabs current={mode} />
       <MatchFilters />

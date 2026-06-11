@@ -21,6 +21,16 @@ export type ParticipantStatus =
   | 'rejected'
   | 'attended'
   | 'no_show'
+export type TournamentSource = 'mango' | 'external'
+export type TournamentStatus = 'upcoming' | 'open' | 'closed' | 'finished'
+export type ClubRole = 'owner' | 'manager' | 'member'
+export type ProductCategory =
+  | 'racket'
+  | 'shuttlecock'
+  | 'shoes'
+  | 'apparel'
+  | 'bag'
+  | 'other'
 
 export type Profile = {
   id: string
@@ -38,8 +48,103 @@ export type Profile = {
   manner_score: number
   satisfaction_rate: number | null
   review_count: number
+  association_code: string | null
+  primary_club_id: string | null
   created_at: string
   updated_at: string
+}
+
+export type Club = {
+  id: string
+  name: string
+  description: string | null
+  image_url: string | null
+  region_sido: string
+  region_sigungu: string
+  home_court_id: string | null
+  owner_id: string
+  member_count: number
+  grade_min: SkillGrade
+  grade_max: SkillGrade
+  monthly_fee: number
+  meeting_schedule: string | null
+  is_recruiting: boolean
+  created_at: string
+  updated_at: string
+}
+
+export type ClubMember = {
+  id: string
+  club_id: string
+  user_id: string
+  role: ClubRole
+  joined_at: string
+}
+
+export type Tournament = {
+  id: string
+  title: string
+  poster_url: string | null
+  source: TournamentSource
+  organizer: string | null
+  region_sido: string | null
+  region_sigungu: string | null
+  venue_name: string | null
+  starts_on: string
+  ends_on: string | null
+  registration_url: string | null
+  prize: string | null
+  fee: number | null
+  bracket_url: string | null
+  status: TournamentStatus
+  posted_by: string | null
+  description: string | null
+  created_at: string
+  updated_at: string
+}
+
+export type MatchScore = {
+  id: string
+  match_id: string
+  recorded_by: string
+  set_number: number
+  team_a_label: string | null
+  team_b_label: string | null
+  team_a_score: number
+  team_b_score: number
+  winner_team: string | null
+  notes: string | null
+  created_at: string
+  updated_at: string
+}
+
+export type Product = {
+  id: string
+  category: ProductCategory
+  brand: string | null
+  name: string
+  image_url: string | null
+  price: number | null
+  original_price: number | null
+  partner_url: string
+  rating_avg: number | null
+  rating_count: number
+  description: string | null
+  is_featured: boolean
+  sort_order: number
+  created_at: string
+}
+
+export type Banner = {
+  id: string
+  title: string
+  image_url: string
+  link_url: string | null
+  sort_order: number
+  is_active: boolean
+  starts_at: string | null
+  ends_at: string | null
+  created_at: string
 }
 
 export type Court = {
@@ -111,6 +216,27 @@ type ParticipantInsert = AutoInsert<
   MatchParticipant,
   'id' | 'created_at' | 'updated_at' | 'status'
 >
+type ClubInsert = AutoInsert<
+  Club,
+  'id' | 'created_at' | 'updated_at' | 'member_count' | 'is_recruiting' | 'monthly_fee' | 'grade_min' | 'grade_max'
+>
+type ClubMemberInsert = AutoInsert<ClubMember, 'id' | 'joined_at' | 'role'>
+type TournamentInsert = AutoInsert<
+  Tournament,
+  'id' | 'created_at' | 'updated_at' | 'status' | 'source'
+>
+type MatchScoreInsert = AutoInsert<
+  MatchScore,
+  'id' | 'created_at' | 'updated_at' | 'set_number' | 'team_a_score' | 'team_b_score'
+>
+type ProductInsert = AutoInsert<
+  Product,
+  'id' | 'created_at' | 'is_featured' | 'sort_order' | 'rating_count'
+>
+type BannerInsert = AutoInsert<
+  Banner,
+  'id' | 'created_at' | 'is_active' | 'sort_order'
+>
 
 export type Database = {
   __InternalSupabase: {
@@ -140,6 +266,42 @@ export type Database = {
         Row: MatchParticipant
         Insert: ParticipantInsert
         Update: Partial<MatchParticipant>
+        Relationships: []
+      }
+      clubs: {
+        Row: Club
+        Insert: ClubInsert
+        Update: Partial<Club>
+        Relationships: []
+      }
+      club_members: {
+        Row: ClubMember
+        Insert: ClubMemberInsert
+        Update: Partial<ClubMember>
+        Relationships: []
+      }
+      tournaments: {
+        Row: Tournament
+        Insert: TournamentInsert
+        Update: Partial<Tournament>
+        Relationships: []
+      }
+      match_scores: {
+        Row: MatchScore
+        Insert: MatchScoreInsert
+        Update: Partial<MatchScore>
+        Relationships: []
+      }
+      products: {
+        Row: Product
+        Insert: ProductInsert
+        Update: Partial<Product>
+        Relationships: []
+      }
+      banners: {
+        Row: Banner
+        Insert: BannerInsert
+        Update: Partial<Banner>
         Relationships: []
       }
     }
